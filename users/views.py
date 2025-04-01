@@ -1,8 +1,9 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from .models import SinhVien, LichSuRaVao, LichSuNapTien, LichSuThanhToan
 from .serializers import (SinhVienSerializer, LichSuRaVaoSerializer, 
                          LichSuNapTienSerializer, LichSuThanhToanSerializer)
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
 
 class SinhVienViewSet(viewsets.ModelViewSet):
     queryset = SinhVien.objects.all()
@@ -12,11 +13,12 @@ class SinhVienViewSet(viewsets.ModelViewSet):
         data = request.data.copy()
 
         # Lấy mật khẩu riêng ra và loại bỏ khỏi dict
+        ma_sv = data.get("ma_sv")
         mat_khau = data.pop('mat_khau', None)
 
         # Tạo user bằng create_user() nếu có mật khẩu
         if mat_khau:
-            sinh_vien = SinhVien.objects.create_user(mat_khau=mat_khau, **data)
+            sinh_vien = SinhVien.objects.create_user(username=ma_sv,mat_khau=mat_khau, **data)
         else:
             sinh_vien = SinhVien.objects.create(**data)  # Nếu không có mật khẩu
 

@@ -6,7 +6,7 @@ model = YOLO("D:/Documents/src_py/PBL5/smart_parking/modelAI/empty_space/runs/de
 
 def scanEmptySpace():
     # đọc ảnh
-    image_path = "D:\Documents\src_py\empty_space\l2.jpg" 
+    image_path = "D:\Documents\src_py\empty_space\captured_25.jpg" 
     image = cv2.imread(image_path)
     if image is None:
         raise ValueError("Không thể đọc hình ảnh")
