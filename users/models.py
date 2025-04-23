@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-class SinhVien(AbstractUser):
-    ma_sv = models.IntegerField(unique=True)  # Không làm primary_key
-    mat_khau = models.CharField(max_length=255, null=True, blank=True)  # Không đặt default password
+class SinhVien(models.Model):
+    ma_sv = models.IntegerField(unique=True, primary_key=True)
+    mat_khau = models.CharField(max_length=255 ,default="cntt123")
     ho_ten = models.CharField(max_length=255)
     id_rfid = models.CharField(max_length=255, unique=True)
     so_tien_hien_co = models.FloatField(default=0)

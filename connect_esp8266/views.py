@@ -55,64 +55,66 @@ def nhan_du_lieu_rfid(request):
     try:
         sinh_vien = SinhVien.objects.get(id_rfid=id_rfid)
     except SinhVien.DoesNotExist:
-        sinh_vien = None
+        return Response(
+            {"message": "Không tìm thấy sinh viên"},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     # Lưu log thẻ từ
-    the_tu_log = TheTuLog(
+    the_tu_log = TheTuLog.objects.create(
         id_rfid=id_rfid,
         sinh_vien=sinh_vien,
-        trang_thai="Đã đọc" if sinh_vien else "Không tìm thấy sinh viên"
+        trang_thai="Đã đọc"
     )
-    the_tu_log.save()
-    
-    # đọc biển số xe
-    
-    
+
     action = "null"
     if sinh_vien:
         # đi vào
         if sinh_vien.trang_thai != "Đang đỗ":
-            lich_su_ra_vao = LichSuRaVao(
+            lich_su_ra_vao = LichSuRaVao.objects.create(
                 sinh_vien=sinh_vien,
                 bien_so_xe="Chưa xác định",
                 thoi_gian_vao=timezone.now(),
                 thoi_gian_ra=None,
                 trang_thai="Đang đỗ"
             )
-            lich_su_ra_vao.save()
             sinh_vien.trang_thai = "Đang đỗ"
-            sinh_vien.save()
             action = "vao"
         # đi ra
         else:
-            lich_su_ra_vao = LichSuRaVao.objects.filter(sinh_vien=sinh_vien, trang_thai="Đang đỗ").order_by('-thoi_gian_vao').first()
+            lich_su_ra_vao = LichSuRaVao.objects.filter(
+                sinh_vien=sinh_vien, 
+                trang_thai="Đang đỗ"
+            ).order_by('-thoi_gian_vao').first()
+
             if not lich_su_ra_vao:
                 return Response(
                     {"error": "Không tìm thấy bản ghi đang đỗ"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
             lich_su_ra_vao.trang_thai = "Đã ra"
             sinh_vien.trang_thai = "Đã ra"
             lich_su_ra_vao.thoi_gian_ra = timezone.now()
-            lich_su_ra_vao.save()
-            sinh_vien.save()
             action = "ra"
 
-            # Trừ tiền
+            # Lưu thay đổi
+            lich_su_ra_vao.save()
         
-        
-    # quét bãi đỗ xe tìm chỗ trống
+        sinh_vien.save()
+
+    # Quét bãi đỗ xe tìm chỗ trống
+    emptySpace = None
     try:
         emptySpace = scanEmptySpace()
     except Exception as e:
         print(f"Lỗi khi quét dữ liệu chỗ trống: {e}")
+        emptySpace = -1  # Gán giá trị báo lỗi
 
-    
     # Serialize và trả về kết quả
     serializer = TheTuLogSerializer(the_tu_log)
-    print(serializer.data)
     return Response({
         "message": "Dữ liệu thẻ từ đã được xử lý",
-        "emptySpace" : emptySpace,
-        "action" : action
+        "emptySpace": emptySpace,
+        "action": action
     }, status=status.HTTP_201_CREATED)

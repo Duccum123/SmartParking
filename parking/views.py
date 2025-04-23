@@ -6,9 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 class BaiDoXeViewSet(viewsets.ModelViewSet):
     queryset = BaiDoXe.objects.all()
     serializer_class = BaiDoXeSerializer
-    permission_classes = [IsAuthenticated] 
 
 class KhuVucViewSet(viewsets.ModelViewSet):
     queryset = KhuVuc.objects.all()
     serializer_class = KhuVucSerializer
-    permission_classes = [IsAuthenticated]

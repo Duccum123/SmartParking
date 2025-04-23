@@ -6,4 +6,3 @@ from rest_framework.permissions import IsAuthenticated
 class QuanTriVienViewSet(viewsets.ModelViewSet):
     queryset = QuanTriVien.objects.all()
     serializer_class = QuanTriVienSerializer
-    permission_classes = [IsAuthenticated]
