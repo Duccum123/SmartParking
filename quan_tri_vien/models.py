@@ -4,7 +4,7 @@ from django.db import models
 class QuanTriVien(models.Model):
     ma_qtv = models.CharField(max_length=50, primary_key=True)
     ho_ten = models.CharField(max_length=255)
-    so_dien_thoai = models.IntegerField
+    so_dien_thoai = models.IntegerField()
     mat_khau = models.CharField(max_length=255)
     vai_tro = models.CharField(max_length=100)
 
