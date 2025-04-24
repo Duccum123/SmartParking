@@ -16,11 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from stream.views import camera_feed
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("api_users/", include("users.urls")),
     path("api_parking/", include("parking.urls")),
     path("api_quan_tri_vien/", include("quan_tri_vien.urls")),
-    path("connect_esp8266/",include("connect_esp8266.urls"))
+    path("connect_esp8266/",include("connect_esp8266.urls")),
+    path('video_feed/', camera_feed, name='video_feed')
 ]
