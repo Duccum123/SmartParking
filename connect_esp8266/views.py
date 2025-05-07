@@ -7,8 +7,22 @@ from users.models import SinhVien
 from django.utils import timezone
 from users.models import LichSuRaVao
 from modelAI.empty_space.emptySpace import scanEmptySpace
-import json
-import requests
+
+
+def tinh_phi(thoi_gian_vao, thoi_gian_ra):
+    duration = thoi_gian_ra - thoi_gian_vao
+    so_gio = duration.total_seconds() / 3600
+
+    # Nếu ra trong cùng ngày
+    if thoi_gian_vao.date() == thoi_gian_ra.date():
+        if so_gio <= 6:
+            return 1000
+        else:
+            return 2000
+    else:
+        # Qua đêm hoặc qua nhiều ngày
+        so_ngay = (thoi_gian_ra.date() - thoi_gian_vao.date()).days + 1
+        return so_ngay * 10000
 
 @api_view(['POST'])
 def nhan_du_lieu_mq2(request):
@@ -95,10 +109,19 @@ def nhan_du_lieu_rfid(request):
             
             lich_su_ra_vao.trang_thai = "Đã ra"
             sinh_vien.trang_thai = "Đã ra"
-            lich_su_ra_vao.thoi_gian_ra = timezone.now()
-            action = "ra"
+            thoi_gian_ra = timezone.now()
+            lich_su_ra_vao.thoi_gian_ra = thoi_gian_ra
 
-            # Lưu thay đổi
+            # Tính tiền gửi xe
+            phi_gui_xe = tinh_phi(lich_su_ra_vao.thoi_gian_vao, thoi_gian_ra)
+            if sinh_vien.so_tien_hien_co < phi_gui_xe:
+                return Response(
+                    {"error": "Số dư không đủ để thanh toán phí gửi xe"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            sinh_vien.so_tien_hien_co -= phi_gui_xe
+
+            action = "ra"
             lich_su_ra_vao.save()
         
         sinh_vien.save()
