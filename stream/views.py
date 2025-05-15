@@ -12,6 +12,10 @@ model = YOLO("D:/Documents/src_py/PBL5/smart_parking/modelAI/empty_space/runs/de
 
 def gen_frames():
     cap = cv2.VideoCapture(1)  # webcam
+    
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    
     if not cap.isOpened():
         raise IOError("Không thể mở camera")
 
@@ -19,7 +23,8 @@ def gen_frames():
         success, frame = cap.read()
         if not success:
             break
-
+        
+        actaul_hight, actual_width = frame.shape[:2]
         # Nhận diện bằng YOLO
         results = model(frame)
 

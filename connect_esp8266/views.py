@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath('D:/Documents/src_py/PBL5/smart_parking/modelAI/license_plate'))
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +11,8 @@ from users.models import SinhVien
 from django.utils import timezone
 from users.models import LichSuRaVao
 from modelAI.empty_space.emptySpace import scanEmptySpace
+from users.models import LichSuThanhToan
+from modelAI.license_plate.main_cam import dectectPlate
 
 
 def tinh_phi(thoi_gian_vao, thoi_gian_ra):
@@ -85,9 +91,12 @@ def nhan_du_lieu_rfid(request):
     if sinh_vien:
         # đi vào
         if sinh_vien.trang_thai != "Đang đỗ":
+            bien_so_xe = dectectPlate()
+            if bien_so_xe is None:
+                bien_so_xe = "Chưa xác định"
             lich_su_ra_vao = LichSuRaVao.objects.create(
                 sinh_vien=sinh_vien,
-                bien_so_xe="Chưa xác định",
+                bien_so_xe=bien_so_xe,
                 thoi_gian_vao=timezone.now(),
                 thoi_gian_ra=None,
                 trang_thai="Đang đỗ"
@@ -120,6 +129,10 @@ def nhan_du_lieu_rfid(request):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             sinh_vien.so_tien_hien_co -= phi_gui_xe
+            LichSuThanhToan.objects.create(
+                sinh_vien=sinh_vien,
+                so_tien=phi_gui_xe
+            )
 
             action = "ra"
             lich_su_ra_vao.save()
